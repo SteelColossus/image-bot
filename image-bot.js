@@ -23,16 +23,16 @@ const client = new Discord.Client();
 const imageClient = new GoogleImages(cseId, apiKey);
 
 // The last time an image was requested
-var lastRequestTime = new Date();
+let lastRequestTime = new Date();
 
 // The list of channels that the bot will automatically find images in 
-var autoChannels = {};
+const autoChannels = {};
 
 // The prefix for all commands
-var prefix = '!';
+const prefix = '!';
 
 // The list of all responses you can get from the magic 8-ball
-var ballResponses = [
+const ballResponses = [
     'yes',
     'no',
     'maybe',
@@ -51,7 +51,7 @@ function random(min, max) {
 // Posts a random image
 function postRandomImage(query, channel, gifsOnly = false) {
     // Get the current request time
-    var newTime = new Date().getTime() - lastRequestTime.getTime();
+    const newTime = new Date().getTime() - lastRequestTime.getTime();
 
     // Check the messages are not being sent too quickly
     if (newTime <= 2500) {
@@ -65,19 +65,19 @@ function postRandomImage(query, channel, gifsOnly = false) {
     }
 
     // Get a random page number. A page is a section of 10 images.
-    var pageNumber = random(1, 5);
+    const pageNumber = random(1, 5);
 
     // The safe search setting for this search
-    var safeSetting = (channel.nsfw) ? 'off' : 'high';
+    const safeSetting = (channel.nsfw) ? 'off' : 'high';
 
     lastRequestTime = new Date();
 
     // Query the image client for an image
     imageClient.search(query, { page: pageNumber, safe: safeSetting }).then(function (images) {
         if (images.length) {
-            var image = { url: '' };
+            let image = { url: '' };
 
-            var count = 0;
+            let count = 0;
             const maxCount = 10;
 
             // Check if the image has a suitable file extension
@@ -107,7 +107,7 @@ function postRandomImage(query, channel, gifsOnly = false) {
 }
 
 // Sets up the logger
-var logger = Winston.createLogger({
+const logger = Winston.createLogger({
     transports: [
         new Winston.transports.Console({ colorize: true, timestamp: true }),
         new Winston.transports.File({ filename: 'image-bot.log' })
@@ -122,21 +122,21 @@ client.on('message', function (message) {
     // Check that a human sent the message and that there is some content
     if (!message.author.bot && message.content.length) {
         if (message.content.startsWith(prefix)) {
-            var firstSpaceIndex = message.content.indexOf(' ');
+            let firstSpaceIndex = message.content.indexOf(' ');
 
             if (firstSpaceIndex === -1) {
                 firstSpaceIndex = message.content.length;
             }
 
             // Set up the command and arguments for it
-            var command = message.content.substring(prefix.length, firstSpaceIndex);
-            var remainingString = message.content.substring(firstSpaceIndex + 1);
+            const command = message.content.substring(prefix.length, firstSpaceIndex);
+            const remainingString = message.content.substring(firstSpaceIndex + 1);
 
             // Enables automatic images
             if (command === 'enableautoimages') {
-                var channelId = message.channel.id;
-                var alreadyEnabled = (autoChannels[channelId] === true);
-                var messageText = '';
+                const channelId = message.channel.id;
+                const alreadyEnabled = (autoChannels[channelId] === true);
+                let messageText = '';
 
                 if (!alreadyEnabled) {
                     autoChannels[channelId] = true;
@@ -153,9 +153,9 @@ client.on('message', function (message) {
             }
             // Disables automatic images
             else if (command === 'disableautoimages') {
-                var channelId = message.channel.id;
-                var alreadyDisabled = (autoChannels[channelId] !== true);
-                var messageText = '';
+                const channelId = message.channel.id;
+                const alreadyDisabled = (autoChannels[channelId] !== true);
+                let messageText = '';
 
                 if (!alreadyDisabled) {
                     autoChannels[channelId] = false;
@@ -178,14 +178,14 @@ client.on('message', function (message) {
             else if (command === '8ball') {
                 logger.info('User \'' + message.author.username + '\' wanted to know the magic 8-ball\'s answer to the following question: \'' + remainingString + '\'');
 
-                var randomResponse = ballResponses[random(0, ballResponses.length - 1)];
+                const randomResponse = ballResponses[random(0, ballResponses.length - 1)];
 
                 logger.info('The magic 8-ball has an answer! It is: \'' + randomResponse + '\'');
 
                 postRandomImage(randomResponse + ' gif', message.channel, true);
             }
             else if (command === 'help' || command.includes('image')) {
-                var messageText = '';
+                let messageText = '';
 
                 if (command === 'help') {
                     messageText = 'Here are all my commands:';
