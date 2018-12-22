@@ -73,7 +73,7 @@ function postRandomImage(query, channel, gifsOnly = false) {
     lastRequestTime = new Date();
 
     // Query the image client for an image
-    imageClient.search(query, { page: pageNumber, safe: safeSetting }).then(function (images) {
+    imageClient.search(query, { page: pageNumber, safe: safeSetting }).then((images) => {
         if (images.length) {
             let image = { url: '' };
 
@@ -100,7 +100,7 @@ function postRandomImage(query, channel, gifsOnly = false) {
             channel.send('No images found matching your request.');
             logger.info('No images were found matching the request: ' + query);
         }
-    }, function (err) {
+    }, (err) => {
         channel.send('There was an error: ' + err.message);
         logger.error('There was an error: ' + err.message);
     });
@@ -114,11 +114,11 @@ const logger = Winston.createLogger({
     ]
 })
 
-client.on('ready', function () {
+client.on('ready', () => {
     logger.info('I am ready!');
 });
 
-client.on('message', function (message) {
+client.on('message', (message) => {
     // Check that a human sent the message and that there is some content
     if (!message.author.bot && message.content.length) {
         if (message.content.startsWith(prefix)) {
@@ -207,9 +207,6 @@ client.on('message', function (message) {
             logger.info('User \'' + message.author.username + '\' requested the image \'' + message.content + '\' as an automatic image');
 
             postRandomImage(message.content, message.channel);
-        }
-        else if (message.content.includes('Kareem Bot')) {
-            message.reply('Kareem Bot is gone. I have taken his place.');
         }
     }
 });
