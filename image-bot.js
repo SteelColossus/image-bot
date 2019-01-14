@@ -74,7 +74,7 @@ function postRandomImage(query, channel, gifsOnly = false) {
 
     // Query the image client for an image
     imageClient.search(query, { page: pageNumber, safe: safeSetting }).then((images) => {
-        if (images.length) {
+        if (images.length > 0) {
             let image = { url: '' };
 
             let count = 0;
@@ -89,20 +89,20 @@ function postRandomImage(query, channel, gifsOnly = false) {
             if (count <= maxCount) {
                 // Send the image
                 channel.send('', { file: image.url });
-                logger.info('Posted a new image: ' + image.url);
+                logger.info(`Posted a new image: ${image.url}`);
             }
             else {
                 channel.send('No embeddable images were found matching your request.');
-                logger.info('No embeddable images were found matching the request: ' + query);
+                logger.info(`No embeddable images were found matching the request: ${query}`);
             }
         }
         else {
             channel.send('No images found matching your request.');
-            logger.info('No images were found matching the request: ' + query);
+            logger.info(`No images were found matching the request: ${query}`);
         }
     }, (err) => {
-        channel.send('There was an error: ' + err.message);
-        logger.error('There was an error: ' + err.message);
+        channel.send(`There was an error: ${err.message}`);
+        logger.error(`There was an error: ${err.message}`);
     });
 }
 
@@ -120,7 +120,7 @@ client.on('ready', () => {
 
 client.on('message', (message) => {
     // Check that a human sent the message and that there is some content
-    if (!message.author.bot && message.content.length) {
+    if (!message.author.bot && message.content.length > 0) {
         if (message.content.startsWith(prefix)) {
             let firstSpaceIndex = message.content.indexOf(' ');
 
@@ -141,7 +141,7 @@ client.on('message', (message) => {
                 if (!alreadyEnabled) {
                     autoChannels[channelId] = true;
                     messageText = 'Automatic images have been enabled in this channel.';
-                    logger.info('Automatic images were enabled in channel: ' + message.channel.name + ', id: ' + channelId);
+                    logger.info(`Automatic images were enabled in channel: ${message.channel.name}, id: ${channelId}`);
                 }
                 else {
                     messageText = 'Automatic images are already enabled in this channel.';
@@ -160,7 +160,7 @@ client.on('message', (message) => {
                 if (!alreadyDisabled) {
                     autoChannels[channelId] = false;
                     messageText = 'Automatic images have been disabled in this channel.';
-                    logger.info('Automatic images were disabled in channel: ' + message.channel.name + ', id: ' + channelId);
+                    logger.info(`Automatic images were disabled in channel: ${message.channel.name}, id: ${channelId}`);
                 }
                 else {
                     messageText = 'Automatic images are already disabled in this channel.';
@@ -171,16 +171,16 @@ client.on('message', (message) => {
                 message.channel.send(messageText);
             }
             else if (command === 'image') {
-                logger.info('User \'' + message.author.username + '\' requested the image \'' + remainingString + '\' as a command');
+                logger.info(`User '${message.author.username}' requested the image '${remainingString}' as a command`);
 
                 postRandomImage(remainingString, message.channel);
             }
             else if (command === '8ball') {
-                logger.info('User \'' + message.author.username + '\' wanted to know the magic 8-ball\'s answer to the following question: \'' + remainingString + '\'');
+                logger.info(`User '${message.author.username}' wanted to know the magic 8-ball's answer to the following question: '${remainingString}'`);
 
                 const randomResponse = ballResponses[random(0, ballResponses.length - 1)];
 
-                logger.info('The magic 8-ball has an answer! It is: \'' + randomResponse + '\'');
+                logger.info(`The magic 8-ball has an answer! It is: '${randomResponse}'`);
 
                 postRandomImage(randomResponse + ' gif', message.channel, true);
             }
@@ -204,7 +204,7 @@ client.on('message', (message) => {
             }
         }
         else if (autoChannels[message.channel.id] === true) {
-            logger.info('User \'' + message.author.username + '\' requested the image \'' + message.content + '\' as an automatic image');
+            logger.info(`User '${message.author.username}' requested the image '${message.content}' as an automatic image`);
 
             postRandomImage(message.content, message.channel);
         }
