@@ -6,12 +6,13 @@
   "dependencies": {
     "discord.js": "^11.4.2",
     "google-images": "^2.1.0",
-    "winston": "^3.1.0"
+    "winston": "^3.2.1"
   },
   "devDependencies": {
-    "eslint": "^5.12.0"
+    "eslint": "^5.15.1"
   },
   "scripts": {
+    "start": "node .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "steelcolossus",

@@ -101,8 +101,8 @@ function postRandomImage(query, channel, gifsOnly = false) {
             logger.info(`No images were found matching the request: ${query}`);
         }
     }, (err) => {
-        channel.send(`There was an error: ${err.message}`);
-        logger.error(`There was an error: ${err.message}`);
+        channel.send(`There was an error requesting your image: ${err.message}`);
+        logger.error(`There was an error requesting the image '${query}': ${err.message}`);
     });
 }
 
@@ -209,6 +209,10 @@ client.on('message', (message) => {
             postRandomImage(message.content, message.channel);
         }
     }
+});
+
+client.on('error', (err) => {
+    logger.error(`There was a connection error: ${err.message}`);
 });
 
 client.login(token);
