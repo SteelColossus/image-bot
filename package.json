@@ -9,11 +9,13 @@
     "winston": "^3.2.1"
   },
   "devDependencies": {
-    "eslint": "^5.15.1"
+    "eslint": "^5.16.0"
   },
   "scripts": {
     "start": "node .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "node_modules/.bin/eslint **/*.js",
+    "lint:fix": "node_modules/.bin/eslint **/*.js --fix"
   },
   "author": "steelcolossus",
   "repository": {

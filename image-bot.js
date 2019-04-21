@@ -7,20 +7,14 @@ const GoogleImages = require('google-images');
 // The winston API
 const Winston = require('winston');
 
-// The token of this bot - https://discordapp.com/developers/applications/me
-const token = 'NDE4NDkxODE1NjYzMTA4MDk3.DXiZWA.M2DaL0stc84EGLagzUK81ftMUJ0';
-
-// The ID of the custom search engine - https://cse.google.com/cse/all
-const cseId = '002119232396553258453:4i84ey-6h2k';
-
-// The Google developers API key (used for the custom search engine) - https://console.developers.google.com/apis/
-const apiKey = 'AIzaSyD3bTLi46qEXsRV6RGSn8w7UJoHegIYz2g';
+// All tokens needed for APIs
+const tokens = require('./tokens');
 
 // The discord client used to interact with Discord
 const client = new Discord.Client();
 
 // The google images client used to search for images
-const imageClient = new GoogleImages(cseId, apiKey);
+const imageClient = new GoogleImages(tokens.CSE_ID, tokens.API_KEY);
 
 // The last time an image was requested
 let lastRequestTime = new Date();
@@ -215,4 +209,4 @@ client.on('error', (err) => {
     logger.error(`There was a connection error: ${err.message}`);
 });
 
-client.login(token);
+client.login(tokens.TOKEN);
