@@ -9,5 +9,5 @@ A Discord bot which posts images from user searches.
 ## Running from docker
 You can run the latest version of the bot from docker by running the following command:
 ```
-docker run -d --name image-bot steelcolossus/image-bot
+docker run -d --name image-bot -e TOKEN=<your-bot-token> -e CSE_ID=<your-cse-id> -e API_KEY=<your-google-api-key> steelcolossus/image-bot
 ```

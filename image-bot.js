@@ -7,14 +7,27 @@ const GoogleImages = require('google-images');
 // The winston API
 const Winston = require('winston');
 
-// All tokens needed for APIs
-const tokens = require('./tokens');
+// Sets up the logger
+const logger = Winston.createLogger({
+    transports: [
+        new Winston.transports.Console({ colorize: true, timestamp: true }),
+        new Winston.transports.File({ filename: 'image-bot.log' })
+    ]
+})
+
+// Loads all tokens needed for APIs
+require('dotenv').config();
+
+if (!process.env.CSE_ID || !process.env.API_KEY || !process.env.TOKEN) {
+    logger.error('One or more of the required api keys were not found. Have you set the correct environment variables?');
+    return;
+}
 
 // The discord client used to interact with Discord
 const client = new Discord.Client();
 
 // The google images client used to search for images
-const imageClient = new GoogleImages(tokens.CSE_ID, tokens.API_KEY);
+const imageClient = new GoogleImages(process.env.CSE_ID, process.env.API_KEY);
 
 // The last time an image was requested
 let lastRequestTime = new Date();
@@ -99,14 +112,6 @@ function postRandomImage(query, channel, gifsOnly = false) {
         logger.error(`There was an error requesting the image '${query}': ${err.message}`);
     });
 }
-
-// Sets up the logger
-const logger = Winston.createLogger({
-    transports: [
-        new Winston.transports.Console({ colorize: true, timestamp: true }),
-        new Winston.transports.File({ filename: 'image-bot.log' })
-    ]
-})
 
 client.on('ready', () => {
     logger.info('I am ready!');
@@ -209,4 +214,4 @@ client.on('error', (err) => {
     logger.error(`There was a connection error: ${err.message}`);
 });
 
-client.login(tokens.TOKEN);
+client.login(process.env.TOKEN);
