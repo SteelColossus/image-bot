@@ -129,7 +129,7 @@ client.on('message', (message) => {
 
             // Set up the command and arguments for it
             const command = message.content.substring(prefix.length, firstSpaceIndex);
-            const remainingString = message.content.substring(firstSpaceIndex + 1);
+            const remainingString = message.content.substring(firstSpaceIndex + 1).trim();
 
             // Enables automatic images
             if (command === 'enableautoimages') {
@@ -170,18 +170,28 @@ client.on('message', (message) => {
                 message.channel.send(messageText);
             }
             else if (command === 'image') {
-                logger.info(`User '${message.author.username}' requested the image '${remainingString}' as a command`);
+                if (remainingString.length > 0) {
+                    logger.info(`User '${message.author.username}' requested the image '${remainingString}' as a command`);
 
-                postRandomImage(remainingString, message.channel);
+                    postRandomImage(remainingString, message.channel);
+                }
+                else {
+                    message.channel.send('You need to say which image to get!');
+                }
             }
             else if (command === '8ball') {
-                logger.info(`User '${message.author.username}' wanted to know the magic 8-ball's answer to the following question: '${remainingString}'`);
+                if (remainingString.length > 0) {
+                    logger.info(`User '${message.author.username}' wanted to know the magic 8-ball's answer to the following question: '${remainingString}'`);
 
-                const randomResponse = ballResponses[random(0, ballResponses.length - 1)];
+                    const randomResponse = ballResponses[random(0, ballResponses.length - 1)];
 
-                logger.info(`The magic 8-ball has an answer! It is: '${randomResponse}'`);
+                    logger.info(`The magic 8-ball has an answer! It is: '${randomResponse}'`);
 
-                postRandomImage(randomResponse + ' gif', message.channel, true);
+                    postRandomImage(randomResponse + ' gif', message.channel, true);
+                }
+                else {
+                    message.channel.send('The magic 8-ball does not understand what you want - you need to give it a question!');
+                }
             }
             else if (command === 'help' || command.includes('image')) {
                 let messageText = '';
@@ -193,7 +203,7 @@ client.on('message', (message) => {
                     messageText = 'Did you mean to type one of the following?';
                 }
 
-                messageText += '\n\n';
+                messageText += '\n';
                 messageText += '`!image [query]` - fetches a random image from google images of [query]\n';
                 messageText += '`!enableautoimages` - enables automatic images in the current channel\n';
                 messageText += '`!disableautoimages` - disables automatic images in the current channel\n';
