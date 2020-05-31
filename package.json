@@ -4,17 +4,17 @@
   "description": "A Discord bot which posts images from user searches.",
   "main": "image-bot.js",
   "dependencies": {
-    "discord.js": "^11.6.2",
+    "discord.js": "^11.6.4",
     "dotenv": "^8.2.0",
     "google-images": "^2.1.0",
     "winston": "^3.2.1"
   },
   "devDependencies": {
-    "eslint": "^6.8.0"
+    "eslint": "^7.1.0"
   },
   "scripts": {
     "start": "node .",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "echo Error: this module has no tests && exit 1",
     "lint": "node_modules/.bin/eslint **/*.js",
     "lint:fix": "node_modules/.bin/eslint **/*.js --fix"
   },
