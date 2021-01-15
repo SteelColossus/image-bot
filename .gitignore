@@ -80,3 +80,4 @@ typings/
 ### ADDITIONAL
 .vscode
 image-bot.log
+built/

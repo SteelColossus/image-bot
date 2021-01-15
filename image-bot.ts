@@ -20,7 +20,7 @@ require('dotenv').config();
 
 if (!process.env.CSE_ID || !process.env.API_KEY || !process.env.TOKEN) {
     logger.error('One or more of the required api keys were not found. Have you set the correct environment variables?');
-    return;
+    process.exit(1);
 }
 
 // The discord client used to interact with Discord
