@@ -1,13 +1,26 @@
 {
-    "extends": "eslint:all",
-    "env": {
-        "es6": true,
-        "node": true
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "project": ["./tsconfig.json"]
     },
+    "plugins": [
+        "@typescript-eslint"
+    ],
+    "extends": [
+        "eslint:all",
+        "plugin:@typescript-eslint/all"
+    ],
     "rules": {
         "brace-style": [
             "error",
             "1tbs"
+        ],
+        "eqeqeq": [
+            "error",
+            "always",
+            {
+                "null": "never"
+            }
         ],
         "func-style": [
             "error",
@@ -33,10 +46,23 @@
             "error",
             "always-multiline"
         ],
-        "no-extra-parens": "off",
-        "no-magic-numbers": "off",
+        "no-eq-null": "off",
+        "@typescript-eslint/no-extra-parens": "off",
+        "@typescript-eslint/no-floating-promises": [
+            "error",
+            {
+                "ignoreVoid": true
+            }
+        ],
+        "@typescript-eslint/no-magic-numbers": "off",
         "no-negated-condition": "off",
         "no-ternary": "off",
+        "no-void": [
+            "error",
+            {
+                "allowAsStatement": true
+            }
+        ],
         "object-curly-spacing": [
             "error",
             "always"
@@ -48,11 +74,16 @@
             }
         ],
         "one-var": "off",
+        "operator-linebreak": [
+            "error",
+            "before"
+        ],
         "padded-blocks": [
             "error",
             "never"
         ],
-        "quotes": [
+        "@typescript-eslint/prefer-readonly-parameter-types": "off",
+        "@typescript-eslint/quotes": [
             "error",
             "single"
         ],
@@ -60,10 +91,12 @@
             "error",
             "as-needed"
         ],
-        "space-before-function-paren": [
+        "sort-imports": "off",
+        "sort-keys": "off",
+        "@typescript-eslint/sort-type-union-intersection-members": "off",
+        "@typescript-eslint/space-before-function-paren": [
             "error",
             "never"
-        ],
-        "strict": "off"
+        ]
     }
 }
