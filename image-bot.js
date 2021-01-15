@@ -13,7 +13,7 @@ const logger = Winston.createLogger({
         new Winston.transports.Console({ colorize: true, timestamp: true }),
         new Winston.transports.File({ filename: 'image-bot.log' })
     ]
-})
+});
 
 // Loads all tokens needed for APIs
 require('dotenv').config();
@@ -32,7 +32,7 @@ const imageClient = new GoogleImages(process.env.CSE_ID, process.env.API_KEY);
 // The last time an image was requested
 let lastRequestTime = new Date();
 
-// The list of channels that the bot will automatically find images in 
+// The list of channels that the bot will automatically find images in
 const autoChannels = {};
 
 // The prefix for all commands
@@ -48,7 +48,7 @@ const ballResponses = [
     'stupid question',
     'nodding',
     'shaking my head'
-]
+];
 
 // Returns a random number between a minimum and a maximum
 function random(min, max) {
@@ -88,22 +88,21 @@ function postRandomImage(query, channel, gifsOnly = false) {
             const maxCount = 10;
 
             // Check if the image has a suitable file extension
+            // eslint-disable-next-line no-unmodified-loop-condition
             while (!(((image.url.endsWith('.jpg') || image.url.endsWith('.png')) && !gifsOnly) || image.url.endsWith('.gif')) && count <= maxCount) {
                 image = images[random(0, images.length - 1)];
-                count++;
+                count += 1;
             }
 
             if (count <= maxCount) {
                 // Send the image
                 channel.send('', { file: image.url });
                 logger.info(`Posted a new image: ${image.url}`);
-            }
-            else {
+            } else {
                 channel.send('No embeddable images were found matching your request.');
                 logger.info(`No embeddable images were found matching the request: ${query}`);
             }
-        }
-        else {
+        } else {
             channel.send('No images found matching your request.');
             logger.info(`No images were found matching the request: ${query}`);
         }
@@ -141,17 +140,15 @@ client.on('message', (message) => {
                     autoChannels[channelId] = true;
                     messageText = 'Automatic images have been enabled in this channel.';
                     logger.info(`Automatic images were enabled in channel: ${message.channel.name}, id: ${channelId}`);
-                }
-                else {
+                } else {
                     messageText = 'Automatic images are already enabled in this channel.';
                 }
 
                 messageText += '\n If you want to disable automatic images in this channel, type `!disableautoimages`.';
 
                 message.channel.send(messageText);
-            }
-            // Disables automatic images
-            else if (command === 'disableautoimages') {
+            } else if (command === 'disableautoimages') {
+                // Disables automatic images
                 const channelId = message.channel.id;
                 const alreadyDisabled = (autoChannels[channelId] !== true);
                 let messageText = '';
@@ -160,26 +157,22 @@ client.on('message', (message) => {
                     autoChannels[channelId] = false;
                     messageText = 'Automatic images have been disabled in this channel.';
                     logger.info(`Automatic images were disabled in channel: ${message.channel.name}, id: ${channelId}`);
-                }
-                else {
+                } else {
                     messageText = 'Automatic images are already disabled in this channel.';
                 }
 
                 messageText += '\n If you want to enable automatic images in this channel, type `!enableautoimages`.';
 
                 message.channel.send(messageText);
-            }
-            else if (command === 'image') {
+            } else if (command === 'image') {
                 if (remainingString.length > 0) {
                     logger.info(`User '${message.author.username}' requested the image '${remainingString}' as a command`);
 
                     postRandomImage(remainingString, message.channel);
-                }
-                else {
+                } else {
                     message.channel.send('You need to say which image to get!');
                 }
-            }
-            else if (command === '8ball') {
+            } else if (command === '8ball') {
                 if (remainingString.length > 0) {
                     logger.info(`User '${message.author.username}' wanted to know the magic 8-ball's answer to the following question: '${remainingString}'`);
 
@@ -187,19 +180,16 @@ client.on('message', (message) => {
 
                     logger.info(`The magic 8-ball has an answer! It is: '${randomResponse}'`);
 
-                    postRandomImage(randomResponse + ' gif', message.channel, true);
-                }
-                else {
+                    postRandomImage(`${randomResponse} gif`, message.channel, true);
+                } else {
                     message.channel.send('The magic 8-ball does not understand what you want - you need to give it a question!');
                 }
-            }
-            else if (command === 'help' || command.includes('image')) {
+            } else if (command === 'help' || command.includes('image')) {
                 let messageText = '';
 
                 if (command === 'help') {
                     messageText = 'Here are all my commands:';
-                }
-                else {
+                } else {
                     messageText = 'Did you mean to type one of the following?';
                 }
 
@@ -211,8 +201,7 @@ client.on('message', (message) => {
 
                 message.channel.send(messageText);
             }
-        }
-        else if (autoChannels[message.channel.id] === true) {
+        } else if (autoChannels[message.channel.id] === true) {
             logger.info(`User '${message.author.username}' requested the image '${message.content}' as an automatic image`);
 
             postRandomImage(message.content, message.channel);

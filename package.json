@@ -3,6 +3,18 @@
   "version": "1.0.0",
   "description": "A Discord bot which posts images from user searches.",
   "main": "image-bot.js",
+  "author": "steelcolossus",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SteelColossus/image-bot.git"
+  },
+  "private": true,
+  "scripts": {
+    "start": "node .",
+    "test": "echo Error: this module has no tests && exit 1",
+    "lint": "eslint **/*.js",
+    "lint:fix": "eslint **/*.js --fix"
+  },
   "dependencies": {
     "discord.js": "^11.6.4",
     "dotenv": "^8.2.0",
@@ -10,18 +22,6 @@
     "winston": "^3.3.3"
   },
   "devDependencies": {
-    "eslint": "^7.7.0"
-  },
-  "scripts": {
-    "start": "node .",
-    "test": "echo Error: this module has no tests && exit 1",
-    "lint": "node_modules/.bin/eslint **/*.js",
-    "lint:fix": "node_modules/.bin/eslint **/*.js --fix"
-  },
-  "author": "steelcolossus",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/SteelColossus/image-bot.git"
-  },
-  "private": true
+    "eslint": "^7.17.0"
+  }
 }
