@@ -1,5 +1,5 @@
 // The discord.js API
-import type { TextChannel, DMChannel, GroupDMChannel } from 'discord.js';
+import type { TextChannel, DMChannel, NewsChannel } from 'discord.js';
 import { Client } from 'discord.js';
 // The google-images API
 import * as GoogleImages from 'google-images';
@@ -61,7 +61,7 @@ function random(min: number, max: number): number {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function getChannelName(channel: TextChannel | DMChannel | GroupDMChannel): string {
+function getChannelName(channel: TextChannel | DMChannel | NewsChannel): string {
     if ('name' in channel) {
         return channel.name;
     }
@@ -69,7 +69,7 @@ function getChannelName(channel: TextChannel | DMChannel | GroupDMChannel): stri
     return `${channel.recipient.username} DM`;
 }
 
-function getSafeSetting(channel: TextChannel | DMChannel | GroupDMChannel): 'off' | 'high' {
+function getSafeSetting(channel: TextChannel | DMChannel | NewsChannel): 'off' | 'high' {
     let nsfw = true;
 
     if ('nsfw' in channel) {
@@ -81,7 +81,7 @@ function getSafeSetting(channel: TextChannel | DMChannel | GroupDMChannel): 'off
 }
 
 // Posts a random image
-function postRandomImage(query: string, channel: TextChannel | DMChannel | GroupDMChannel, gifsOnly = false): void {
+function postRandomImage(query: string, channel: TextChannel | DMChannel | NewsChannel, gifsOnly = false): void {
     // Get the current request time
     const newTime = new Date().getTime() - lastRequestTime.getTime();
 
@@ -121,7 +121,7 @@ function postRandomImage(query: string, channel: TextChannel | DMChannel | Group
 
             if (count <= maxCount) {
                 // Send the image
-                void channel.send('', { file: image.url });
+                void channel.send({ files: [image.url] });
                 logger.info(`Posted a new image: ${image.url}`);
             } else {
                 void channel.send('No embeddable images were found matching your request.');
