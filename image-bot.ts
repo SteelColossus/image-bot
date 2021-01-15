@@ -1,18 +1,20 @@
 // The discord.js API
-const Discord = require('discord.js');
-
+import { Client, TextChannel, DMChannel, GroupDMChannel } from 'discord.js';
 // The google-images API
-const GoogleImages = require('google-images');
-
+import * as GoogleImages from 'google-images';
 // The winston API
-const Winston = require('winston');
+import { createLogger, transports, format } from 'winston';
 
 // Sets up the logger
-const logger = Winston.createLogger({
+const logger = createLogger({
     transports: [
-        new Winston.transports.Console({ colorize: true, timestamp: true }),
-        new Winston.transports.File({ filename: 'image-bot.log' })
-    ]
+        new transports.Console(),
+        new transports.File({ filename: 'image-bot.log' })
+    ],
+    format: format.combine(
+        format.colorize(),
+        format.timestamp()
+    )
 });
 
 // Loads all tokens needed for APIs
@@ -24,7 +26,7 @@ if (!process.env.CSE_ID || !process.env.API_KEY || !process.env.TOKEN) {
 }
 
 // The discord client used to interact with Discord
-const client = new Discord.Client();
+const client = new Client();
 
 // The google images client used to search for images
 const imageClient = new GoogleImages(process.env.CSE_ID, process.env.API_KEY);
@@ -33,7 +35,7 @@ const imageClient = new GoogleImages(process.env.CSE_ID, process.env.API_KEY);
 let lastRequestTime = new Date();
 
 // The list of channels that the bot will automatically find images in
-const autoChannels = {};
+const autoChannels = new Map<string, boolean>();
 
 // The prefix for all commands
 const prefix = '!';
@@ -51,12 +53,30 @@ const ballResponses = [
 ];
 
 // Returns a random number between a minimum and a maximum
-function random(min, max) {
+function random(min: number, max: number) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+function getChannelName(channel: TextChannel | DMChannel | GroupDMChannel) {
+    if (channel instanceof DMChannel) {
+        return `${channel.recipient} DM`;
+    } else {
+        return channel.name;
+    }
+}
+
+function getSafeSetting(channel: TextChannel | DMChannel | GroupDMChannel) {
+    let nsfw = true;
+
+    if (channel instanceof TextChannel) {
+        nsfw = channel.nsfw;
+    }
+
+    return nsfw ? 'off' : 'high';
+}
+
 // Posts a random image
-function postRandomImage(query, channel, gifsOnly = false) {
+function postRandomImage(query: string, channel: TextChannel | DMChannel | GroupDMChannel, gifsOnly = false) {
     // Get the current request time
     const newTime = new Date().getTime() - lastRequestTime.getTime();
 
@@ -75,7 +95,7 @@ function postRandomImage(query, channel, gifsOnly = false) {
     const pageNumber = random(1, 5);
 
     // The safe search setting for this search
-    const safeSetting = (channel.nsfw) ? 'off' : 'high';
+    const safeSetting = getSafeSetting(channel);
 
     lastRequestTime = new Date();
 
@@ -133,13 +153,13 @@ client.on('message', (message) => {
             // Enables automatic images
             if (command === 'enableautoimages') {
                 const channelId = message.channel.id;
-                const alreadyEnabled = (autoChannels[channelId] === true);
+                const alreadyEnabled = autoChannels.get(channelId) ?? false;
                 let messageText = '';
 
                 if (!alreadyEnabled) {
-                    autoChannels[channelId] = true;
+                    autoChannels.set(channelId, true);
                     messageText = 'Automatic images have been enabled in this channel.';
-                    logger.info(`Automatic images were enabled in channel: ${message.channel.name}, id: ${channelId}`);
+                    logger.info(`Automatic images were enabled in channel: ${getChannelName(message.channel)}, id: ${channelId}`);
                 } else {
                     messageText = 'Automatic images are already enabled in this channel.';
                 }
@@ -150,13 +170,13 @@ client.on('message', (message) => {
             } else if (command === 'disableautoimages') {
                 // Disables automatic images
                 const channelId = message.channel.id;
-                const alreadyDisabled = (autoChannels[channelId] !== true);
+                const alreadyDisabled = !(autoChannels.get(channelId) ?? false);
                 let messageText = '';
 
                 if (!alreadyDisabled) {
-                    autoChannels[channelId] = false;
+                    autoChannels.set(channelId, false);
                     messageText = 'Automatic images have been disabled in this channel.';
-                    logger.info(`Automatic images were disabled in channel: ${message.channel.name}, id: ${channelId}`);
+                    logger.info(`Automatic images were disabled in channel: ${getChannelName(message.channel)}, id: ${channelId}`);
                 } else {
                     messageText = 'Automatic images are already disabled in this channel.';
                 }
@@ -201,7 +221,7 @@ client.on('message', (message) => {
 
                 message.channel.send(messageText);
             }
-        } else if (autoChannels[message.channel.id] === true) {
+        } else if (autoChannels.get(message.channel.id) ?? false) {
             logger.info(`User '${message.author.username}' requested the image '${message.content}' as an automatic image`);
 
             postRandomImage(message.content, message.channel);
