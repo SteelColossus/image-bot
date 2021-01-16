@@ -2,7 +2,7 @@
   "name": "image-bot",
   "version": "1.0.0",
   "description": "A Discord bot which posts images from user searches.",
-  "main": "image-bot.js",
+  "main": "image-bot.ts",
   "author": "steelcolossus",
   "repository": {
     "type": "git",
@@ -10,7 +10,7 @@
   },
   "private": true,
   "scripts": {
-    "start": "node .",
+    "start": "ts-node .",
     "test": "echo Error: this module has no tests && exit 1",
     "lint": "eslint **/*.ts",
     "lint:fix": "eslint **/*.ts --fix"
@@ -27,6 +27,7 @@
     "@typescript-eslint/eslint-plugin": "^4.13.0",
     "@typescript-eslint/parser": "^4.13.0",
     "eslint": "^7.18.0",
+    "ts-node": "^9.1.1",
     "typescript": "^4.1.3"
   }
 }

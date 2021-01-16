@@ -1,7 +1,8 @@
 {
     "compilerOptions": {
       "outDir": "./built",
-      "strict": true
+      "strict": true,
+      "sourceMap": true
     },
     "files": ["image-bot.ts"]
   }

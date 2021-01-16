@@ -10,16 +10,21 @@ import { createLogger, transports, format } from 'winston';
 import { config } from 'dotenv';
 config();
 
+const loggerFormat = format.combine(
+    format.timestamp(),
+    format.printf((info) => `${info.timestamp as string} ${info.level}: ${info.message}`)
+);
+
 // Sets up the logger
 const logger = createLogger({
+    format: loggerFormat,
     transports: [
-        new transports.Console(),
+        new transports.Console({ format: format.combine(
+            format.colorize(),
+            loggerFormat
+        ) }),
         new transports.File({ filename: 'image-bot.log' })
-    ],
-    format: format.combine(
-        format.colorize(),
-        format.timestamp()
-    )
+    ]
 });
 
 if ((process.env.CSE_ID == null || !process.env.CSE_ID)
