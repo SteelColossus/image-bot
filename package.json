@@ -10,7 +10,9 @@
   },
   "private": true,
   "scripts": {
+    "build:prod": "tsc --project tsconfig.prod.json",
     "start": "ts-node .",
+    "start:prod": "node ./built/image-bot.js",
     "test": "echo Error: this module has no tests && exit 1",
     "lint": "eslint **/*.ts",
     "lint:fix": "eslint **/*.ts --fix"
@@ -24,6 +26,7 @@
   "devDependencies": {
     "@types/google-images": "^2.1.0",
     "@types/node": "^14.14.21",
+    "@types/ws": "^7.4.0",
     "@typescript-eslint/eslint-plugin": "^4.13.0",
     "@typescript-eslint/parser": "^4.13.0",
     "eslint": "^7.18.0",

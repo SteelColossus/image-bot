@@ -2,7 +2,7 @@
 import type { TextChannel, DMChannel, NewsChannel } from 'discord.js';
 import { Client } from 'discord.js';
 // The google-images API
-import * as GoogleImages from 'google-images';
+import GoogleImages from 'google-images';
 // The winston API
 import { createLogger, transports, format } from 'winston';
 
@@ -19,10 +19,12 @@ const loggerFormat = format.combine(
 const logger = createLogger({
     format: loggerFormat,
     transports: [
-        new transports.Console({ format: format.combine(
-            format.colorize(),
-            loggerFormat
-        ) }),
+        new transports.Console({
+            format: format.combine(
+                format.colorize(),
+                loggerFormat
+            )
+        }),
         new transports.File({ filename: 'image-bot.log' })
     ]
 });
@@ -30,7 +32,7 @@ const logger = createLogger({
 if ((process.env.CSE_ID == null || !process.env.CSE_ID)
     || (process.env.API_KEY == null || !process.env.API_KEY)
     || (process.env.TOKEN == null || !process.env.TOKEN)) {
-    logger.error('One or more of the required api keys were not found. Have you set the correct environment variables?');
+    logger.error('One or more of the required API keys were not found. Have you set the correct environment variables?');
     process.exit(1);
 }
 

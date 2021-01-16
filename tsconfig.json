@@ -1,8 +1,14 @@
 {
-    "compilerOptions": {
-      "outDir": "./built",
-      "strict": true,
-      "sourceMap": true
-    },
-    "files": ["image-bot.ts"]
-  }
+  "compilerOptions": {
+    "outDir": "./built",
+    "strict": true,
+    "sourceMap": true,
+    "target": "es6",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "esModuleInterop": true
+  },
+  "files": [
+    "image-bot.ts"
+  ]
+}
