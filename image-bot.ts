@@ -1,30 +1,43 @@
 // The discord.js API
-const Discord = require('discord.js');
-
+import type { TextChannel, DMChannel, NewsChannel } from 'discord.js';
+import { Client } from 'discord.js';
 // The google-images API
-const GoogleImages = require('google-images');
-
+import GoogleImages from 'google-images';
 // The winston API
-const Winston = require('winston');
+import { createLogger, transports, format } from 'winston';
+
+// Loads all tokens needed for APIs
+import { config } from 'dotenv';
+config();
+
+const loggerFormat = format.combine(
+    format.timestamp(),
+    format.printf((info) => `${info.timestamp as string} ${info.level}: ${info.message}`)
+);
 
 // Sets up the logger
-const logger = Winston.createLogger({
+const logger = createLogger({
+    format: loggerFormat,
     transports: [
-        new Winston.transports.Console({ colorize: true, timestamp: true }),
-        new Winston.transports.File({ filename: 'image-bot.log' })
+        new transports.Console({
+            format: format.combine(
+                format.colorize(),
+                loggerFormat
+            )
+        }),
+        new transports.File({ filename: 'image-bot.log' })
     ]
 });
 
-// Loads all tokens needed for APIs
-require('dotenv').config();
-
-if (!process.env.CSE_ID || !process.env.API_KEY || !process.env.TOKEN) {
-    logger.error('One or more of the required api keys were not found. Have you set the correct environment variables?');
-    return;
+if ((process.env.CSE_ID == null || !process.env.CSE_ID)
+    || (process.env.API_KEY == null || !process.env.API_KEY)
+    || (process.env.TOKEN == null || !process.env.TOKEN)) {
+    logger.error('One or more of the required API keys were not found. Have you set the correct environment variables?');
+    process.exit(1);
 }
 
 // The discord client used to interact with Discord
-const client = new Discord.Client();
+const client = new Client();
 
 // The google images client used to search for images
 const imageClient = new GoogleImages(process.env.CSE_ID, process.env.API_KEY);
@@ -33,7 +46,7 @@ const imageClient = new GoogleImages(process.env.CSE_ID, process.env.API_KEY);
 let lastRequestTime = new Date();
 
 // The list of channels that the bot will automatically find images in
-const autoChannels = {};
+const autoChannels = new Map<string, boolean>();
 
 // The prefix for all commands
 const prefix = '!';
@@ -51,23 +64,42 @@ const ballResponses = [
 ];
 
 // Returns a random number between a minimum and a maximum
-function random(min, max) {
+function random(min: number, max: number): number {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+function getChannelName(channel: TextChannel | DMChannel | NewsChannel): string {
+    if ('name' in channel) {
+        return channel.name;
+    }
+
+    return `${channel.recipient.username} DM`;
+}
+
+function getSafeSetting(channel: TextChannel | DMChannel | NewsChannel): 'off' | 'high' {
+    let nsfw = true;
+
+    if ('nsfw' in channel) {
+        // eslint-disable-next-line prefer-destructuring
+        nsfw = channel.nsfw;
+    }
+
+    return nsfw ? 'off' : 'high';
+}
+
 // Posts a random image
-function postRandomImage(query, channel, gifsOnly = false) {
+function postRandomImage(query: string, channel: TextChannel | DMChannel | NewsChannel, gifsOnly = false): void {
     // Get the current request time
     const newTime = new Date().getTime() - lastRequestTime.getTime();
 
     // Check the messages are not being sent too quickly
     if (newTime <= 2500) {
-        channel.send('Don\'t spam so fast, I\'m on cooldown.');
+        void channel.send('Don\'t spam so fast, I\'m on cooldown.');
         return;
     }
 
     if (query.includes('child')) {
-        channel.send('No thanks, I don\'t feel like getting on a watchlist.');
+        void channel.send('No thanks, I don\'t feel like getting on a watchlist.');
         return;
     }
 
@@ -75,7 +107,7 @@ function postRandomImage(query, channel, gifsOnly = false) {
     const pageNumber = random(1, 5);
 
     // The safe search setting for this search
-    const safeSetting = (channel.nsfw) ? 'off' : 'high';
+    const safeSetting = getSafeSetting(channel);
 
     lastRequestTime = new Date();
 
@@ -96,18 +128,18 @@ function postRandomImage(query, channel, gifsOnly = false) {
 
             if (count <= maxCount) {
                 // Send the image
-                channel.send('', { file: image.url });
+                void channel.send({ files: [image.url] });
                 logger.info(`Posted a new image: ${image.url}`);
             } else {
-                channel.send('No embeddable images were found matching your request.');
+                void channel.send('No embeddable images were found matching your request.');
                 logger.info(`No embeddable images were found matching the request: ${query}`);
             }
         } else {
-            channel.send('No images found matching your request.');
+            void channel.send('No images found matching your request.');
             logger.info(`No images were found matching the request: ${query}`);
         }
-    }, (err) => {
-        channel.send(`There was an error requesting your image: ${err.message}`);
+    }, (err: Error) => {
+        void channel.send(`There was an error requesting your image: ${err.message}`);
         logger.error(`There was an error requesting the image '${query}': ${err.message}`);
     });
 }
@@ -133,44 +165,44 @@ client.on('message', (message) => {
             // Enables automatic images
             if (command === 'enableautoimages') {
                 const channelId = message.channel.id;
-                const alreadyEnabled = (autoChannels[channelId] === true);
+                const alreadyEnabled = autoChannels.get(channelId) ?? false;
                 let messageText = '';
 
                 if (!alreadyEnabled) {
-                    autoChannels[channelId] = true;
+                    autoChannels.set(channelId, true);
                     messageText = 'Automatic images have been enabled in this channel.';
-                    logger.info(`Automatic images were enabled in channel: ${message.channel.name}, id: ${channelId}`);
+                    logger.info(`Automatic images were enabled in channel: ${getChannelName(message.channel)}, id: ${channelId}`);
                 } else {
                     messageText = 'Automatic images are already enabled in this channel.';
                 }
 
                 messageText += '\n If you want to disable automatic images in this channel, type `!disableautoimages`.';
 
-                message.channel.send(messageText);
+                void message.channel.send(messageText);
             } else if (command === 'disableautoimages') {
                 // Disables automatic images
                 const channelId = message.channel.id;
-                const alreadyDisabled = (autoChannels[channelId] !== true);
+                const alreadyDisabled = !(autoChannels.get(channelId) ?? false);
                 let messageText = '';
 
                 if (!alreadyDisabled) {
-                    autoChannels[channelId] = false;
+                    autoChannels.set(channelId, false);
                     messageText = 'Automatic images have been disabled in this channel.';
-                    logger.info(`Automatic images were disabled in channel: ${message.channel.name}, id: ${channelId}`);
+                    logger.info(`Automatic images were disabled in channel: ${getChannelName(message.channel)}, id: ${channelId}`);
                 } else {
                     messageText = 'Automatic images are already disabled in this channel.';
                 }
 
                 messageText += '\n If you want to enable automatic images in this channel, type `!enableautoimages`.';
 
-                message.channel.send(messageText);
+                void message.channel.send(messageText);
             } else if (command === 'image') {
                 if (remainingString.length > 0) {
                     logger.info(`User '${message.author.username}' requested the image '${remainingString}' as a command`);
 
                     postRandomImage(remainingString, message.channel);
                 } else {
-                    message.channel.send('You need to say which image to get!');
+                    void message.channel.send('You need to say which image to get!');
                 }
             } else if (command === '8ball') {
                 if (remainingString.length > 0) {
@@ -182,7 +214,7 @@ client.on('message', (message) => {
 
                     postRandomImage(`${randomResponse} gif`, message.channel, true);
                 } else {
-                    message.channel.send('The magic 8-ball does not understand what you want - you need to give it a question!');
+                    void message.channel.send('The magic 8-ball does not understand what you want - you need to give it a question!');
                 }
             } else if (command === 'help' || command.includes('image')) {
                 let messageText = '';
@@ -199,9 +231,9 @@ client.on('message', (message) => {
                 messageText += '`!disableautoimages` - disables automatic images in the current channel\n';
                 messageText += '`!8ball [question]` - get the magic 8-ball\'s response to the [question]';
 
-                message.channel.send(messageText);
+                void message.channel.send(messageText);
             }
-        } else if (autoChannels[message.channel.id] === true) {
+        } else if (autoChannels.get(message.channel.id) ?? false) {
             logger.info(`User '${message.author.username}' requested the image '${message.content}' as an automatic image`);
 
             postRandomImage(message.content, message.channel);
@@ -209,8 +241,8 @@ client.on('message', (message) => {
     }
 });
 
-client.on('error', (err) => {
+client.on('error', (err: Error) => {
     logger.error(`There was a connection error: ${err.message}`);
 });
 
-client.login(process.env.TOKEN);
+void client.login(process.env.TOKEN);
