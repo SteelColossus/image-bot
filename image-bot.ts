@@ -1,5 +1,5 @@
 // The discord.js API
-import type { TextBasedChannel } from 'discord.js';
+import type { CommandInteraction, Message, MessageOptions, TextBasedChannel } from 'discord.js';
 import { Client, Intents } from 'discord.js';
 // The google-images API
 import GoogleImages from 'google-images';
@@ -57,9 +57,6 @@ let lastRequestTime = new Date();
 // The list of channels that the bot will automatically find images in
 const autoChannels = new Map<string, boolean>();
 
-// The prefix for all commands
-const prefix = '!';
-
 // The list of all responses you can get from the magic 8-ball
 const ballResponses = [
     'yes',
@@ -96,32 +93,32 @@ function getSafeSetting(channel: TextBasedChannel): 'off' | 'high' {
     return nsfw ? 'off' : 'high';
 }
 
-// Posts a random image
-function postRandomImage(query: string, channel: TextBasedChannel, gifsOnly = false): void {
+// eslint-disable-next-line max-params,max-len
+async function postRandomImage<T>(query: string, sendMessage: (message: string | MessageOptions) => Promise<T>, channel: TextBasedChannel | null, gifsOnly = false): Promise<T> {
     // Get the current request time
     const newTime = new Date().getTime() - lastRequestTime.getTime();
 
     // Check the messages are not being sent too quickly
     if (newTime <= 2500) {
-        void channel.send('Don\'t spam so fast, I\'m on cooldown.');
-        return;
+        return sendMessage('Don\'t spam so fast, I\'m on cooldown.');
     }
 
     if (query.includes('child')) {
-        void channel.send('No thanks, I don\'t feel like getting on a watchlist.');
-        return;
+        return sendMessage('No thanks, I don\'t feel like getting on a watchlist.');
     }
 
     // Get a random page number. A page is a section of 10 images.
     const pageNumber = random(1, 5);
 
     // The safe search setting for this search
-    const safeSetting = getSafeSetting(channel);
+    const safeSetting = channel != null ? getSafeSetting(channel) : 'off';
 
     lastRequestTime = new Date();
 
     // Query the image client for an image
-    imageClient.search(query, { page: pageNumber, safe: safeSetting }).then((images) => {
+    try {
+        const images = await imageClient.search(query, { page: pageNumber, safe: safeSetting });
+
         if (images.length > 0) {
             let image = { url: '' };
 
@@ -136,117 +133,135 @@ function postRandomImage(query: string, channel: TextBasedChannel, gifsOnly = fa
             }
 
             if (count <= maxCount) {
-                // Send the image
-                void channel.send({ files: [image.url] });
                 logger.info(`Posted a new image: ${image.url}`);
-            } else {
-                void channel.send('No embeddable images were found matching your request.');
-                logger.info(`No embeddable images were found matching the request: ${query}`);
+                // Send the image
+                return await sendMessage({ files: [image.url] });
             }
-        } else {
-            void channel.send('No images found matching your request.');
-            logger.info(`No images were found matching the request: ${query}`);
+
+            logger.info(`No embeddable images were found matching the request: ${query}`);
+            return await sendMessage('No embeddable images were found matching your request.');
         }
-    }, (err: Error) => {
-        void channel.send(`There was an error requesting your image: ${err.message}`);
+
+        logger.info(`No images were found matching the request: ${query}`);
+        return await sendMessage('No images found matching your request.');
+    } catch (rejectedResponse) {
+        const err = rejectedResponse as Error;
         logger.error(`There was an error requesting the image '${query}': ${err.message}`);
-    });
+        return await sendMessage(`There was an error requesting your image: ${err.message}`);
+    }
+}
+
+async function postRandomImageWithChannel(query: string, channel: TextBasedChannel): Promise<Message> {
+    return postRandomImage(query, async(message) => channel.send(message), channel);
+}
+
+async function postRandomImageWithInteraction(query: string, interaction: CommandInteraction, gifsOnly: boolean): Promise<void> {
+    await postRandomImage(query, async(message) => interaction.reply(message), interaction.channel, gifsOnly);
 }
 
 client.once('ready', () => {
     logger.info('I am ready!');
 });
 
-client.on('messageCreate', (message) => {
+client.on('messageCreate', async(message) => {
     // Check that a human sent the message and that there is some content
     if (!message.author.bot && message.content.length > 0) {
-        if (message.content.startsWith(prefix)) {
-            let firstSpaceIndex = message.content.indexOf(' ');
-
-            if (firstSpaceIndex === -1) {
-                firstSpaceIndex = message.content.length;
-            }
-
-            // Set up the command and arguments for it
-            const command = message.content.substring(prefix.length, firstSpaceIndex);
-            const remainingString = message.content.substring(firstSpaceIndex + 1).trim();
-
-            // Enables automatic images
-            if (command === 'enableautoimages') {
-                const channelId = message.channel.id;
-                const alreadyEnabled = autoChannels.get(channelId) ?? false;
-                let messageText = '';
-
-                if (!alreadyEnabled) {
-                    autoChannels.set(channelId, true);
-                    messageText = 'Automatic images have been enabled in this channel.';
-                    logger.info(`Automatic images were enabled in channel: ${getChannelName(message.channel)}, id: ${channelId}`);
-                } else {
-                    messageText = 'Automatic images are already enabled in this channel.';
-                }
-
-                messageText += '\n If you want to disable automatic images in this channel, type `!disableautoimages`.';
-
-                void message.channel.send(messageText);
-            } else if (command === 'disableautoimages') {
-                // Disables automatic images
-                const channelId = message.channel.id;
-                const alreadyDisabled = !(autoChannels.get(channelId) ?? false);
-                let messageText = '';
-
-                if (!alreadyDisabled) {
-                    autoChannels.set(channelId, false);
-                    messageText = 'Automatic images have been disabled in this channel.';
-                    logger.info(`Automatic images were disabled in channel: ${getChannelName(message.channel)}, id: ${channelId}`);
-                } else {
-                    messageText = 'Automatic images are already disabled in this channel.';
-                }
-
-                messageText += '\n If you want to enable automatic images in this channel, type `!enableautoimages`.';
-
-                void message.channel.send(messageText);
-            } else if (command === 'image') {
-                if (remainingString.length > 0) {
-                    logger.info(`User '${message.author.username}' requested the image '${remainingString}' as a command`);
-
-                    postRandomImage(remainingString, message.channel);
-                } else {
-                    void message.channel.send('You need to say which image to get!');
-                }
-            } else if (command === '8ball') {
-                if (remainingString.length > 0) {
-                    logger.info(`User '${message.author.username}' wanted to know the magic 8-ball's answer to the following question: '${remainingString}'`);
-
-                    const randomResponse = ballResponses[random(0, ballResponses.length - 1)];
-
-                    logger.info(`The magic 8-ball has an answer! It is: '${randomResponse}'`);
-
-                    postRandomImage(`${randomResponse} gif`, message.channel, true);
-                } else {
-                    void message.channel.send('The magic 8-ball does not understand what you want - you need to give it a question!');
-                }
-            } else if (command === 'help' || command.includes('image')) {
-                let messageText = '';
-
-                if (command === 'help') {
-                    messageText = 'Here are all my commands:';
-                } else {
-                    messageText = 'Did you mean to type one of the following?';
-                }
-
-                messageText += '\n';
-                messageText += '`!image [query]` - fetches a random image from google images of [query]\n';
-                messageText += '`!enableautoimages` - enables automatic images in the current channel\n';
-                messageText += '`!disableautoimages` - disables automatic images in the current channel\n';
-                messageText += '`!8ball [question]` - get the magic 8-ball\'s response to the [question]';
-
-                void message.channel.send(messageText);
-            }
-        } else if (autoChannels.get(message.channel.id) ?? false) {
+        if (autoChannels.get(message.channel.id) ?? false) {
             logger.info(`User '${message.author.username}' requested the image '${message.content}' as an automatic image`);
 
-            postRandomImage(message.content, message.channel);
+            await postRandomImageWithChannel(message.content, message.channel);
         }
+    }
+});
+
+client.on('interactionCreate', async(interaction) => {
+    if (!interaction.isCommand()) {
+        return;
+    }
+
+    logger.info(interaction.inCachedGuild());
+
+    switch (interaction.commandName) {
+        case 'enableautoimages': {
+            if (interaction.channel == null) {
+                await interaction.reply('This command must be run within a channel.');
+                return;
+            }
+
+            const { channelId } = interaction;
+            const alreadyEnabled = autoChannels.get(channelId) ?? false;
+            let messageText = '';
+
+            if (!alreadyEnabled) {
+                autoChannels.set(channelId, true);
+                messageText = 'Automatic images have been enabled in this channel.';
+                logger.info(`Automatic images were enabled in channel: ${getChannelName(interaction.channel)}, id: ${channelId}`);
+            } else {
+                messageText = 'Automatic images are already enabled in this channel.';
+            }
+
+            messageText += '\n If you want to disable automatic images in this channel, use `/disableautoimages`.';
+
+            await interaction.reply(messageText);
+            break;
+        }
+        case 'disableautoimages': {
+            if (interaction.channel == null) {
+                await interaction.reply('This command must be run within a channel.');
+                return;
+            }
+
+            const { channelId } = interaction;
+            const alreadyDisabled = !(autoChannels.get(channelId) ?? false);
+            let messageText = '';
+
+            if (!alreadyDisabled) {
+                autoChannels.set(channelId, false);
+                messageText = 'Automatic images have been disabled in this channel.';
+                logger.info(`Automatic images were disabled in channel: ${getChannelName(interaction.channel)}, id: ${channelId}`);
+            } else {
+                messageText = 'Automatic images are already disabled in this channel.';
+            }
+
+            messageText += '\n If you want to enable automatic images in this channel, use `/enableautoimages`.';
+
+            await interaction.reply(messageText);
+            break;
+        }
+        case 'image': {
+            const query = interaction.options.getString('query');
+
+            if (query != null) {
+                logger.info(`User '${interaction.user.username}' requested the image '${query}' as a command`);
+
+                await postRandomImageWithInteraction(query, interaction, false);
+            } else {
+                await interaction.reply('You need to say which image to get!');
+            }
+
+            break;
+        }
+        case '8ball': {
+            const question = interaction.options.getString('question');
+
+            if (question != null) {
+                logger.info(`User '${interaction.user.username}' wanted to know the magic 8-ball's answer to the following question: '${question}'`);
+
+                const randomResponse = ballResponses[random(0, ballResponses.length - 1)];
+
+                logger.info(`The magic 8-ball has an answer! It is: '${randomResponse}'`);
+
+                await postRandomImageWithInteraction(`${randomResponse} gif`, interaction, true);
+            } else {
+                await interaction.reply('The magic 8-ball does not understand what you want - you need to give it a question!');
+            }
+
+            break;
+        }
+        default:
+            logger.info(`Command is not supported: ${interaction.commandName}`);
+            await interaction.reply(`Command is not supported: ${interaction.commandName}`);
+            break;
     }
 });
 

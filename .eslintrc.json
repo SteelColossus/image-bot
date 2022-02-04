@@ -102,6 +102,10 @@
         "@typescript-eslint/space-before-function-paren": [
             "error",
             "never"
+        ],
+        "dot-location": [
+            "error",
+            "property"
         ]
     }
 }
