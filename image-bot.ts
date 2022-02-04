@@ -1,6 +1,6 @@
 // The discord.js API
-import type { TextChannel, DMChannel, NewsChannel } from 'discord.js';
-import { Client } from 'discord.js';
+import type { TextBasedChannel } from 'discord.js';
+import { Client, Intents } from 'discord.js';
 // The google-images API
 import GoogleImages from 'google-images';
 // The winston API
@@ -37,7 +37,16 @@ if ((process.env.CSE_ID == null || !process.env.CSE_ID)
 }
 
 // The discord client used to interact with Discord
-const client = new Client();
+const client = new Client({
+    intents: [
+        Intents.FLAGS.GUILD_MESSAGES,
+        Intents.FLAGS.DIRECT_MESSAGES
+    ],
+    partials: [
+        'CHANNEL',
+        'MESSAGE'
+    ]
+});
 
 // The google images client used to search for images
 const imageClient = new GoogleImages(process.env.CSE_ID, process.env.API_KEY);
@@ -68,7 +77,7 @@ function random(min: number, max: number): number {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function getChannelName(channel: TextChannel | DMChannel | NewsChannel): string {
+function getChannelName(channel: TextBasedChannel): string {
     if ('name' in channel) {
         return channel.name;
     }
@@ -76,7 +85,7 @@ function getChannelName(channel: TextChannel | DMChannel | NewsChannel): string 
     return `${channel.recipient.username} DM`;
 }
 
-function getSafeSetting(channel: TextChannel | DMChannel | NewsChannel): 'off' | 'high' {
+function getSafeSetting(channel: TextBasedChannel): 'off' | 'high' {
     let nsfw = true;
 
     if ('nsfw' in channel) {
@@ -88,7 +97,7 @@ function getSafeSetting(channel: TextChannel | DMChannel | NewsChannel): 'off' |
 }
 
 // Posts a random image
-function postRandomImage(query: string, channel: TextChannel | DMChannel | NewsChannel, gifsOnly = false): void {
+function postRandomImage(query: string, channel: TextBasedChannel, gifsOnly = false): void {
     // Get the current request time
     const newTime = new Date().getTime() - lastRequestTime.getTime();
 
@@ -144,11 +153,11 @@ function postRandomImage(query: string, channel: TextChannel | DMChannel | NewsC
     });
 }
 
-client.on('ready', () => {
+client.once('ready', () => {
     logger.info('I am ready!');
 });
 
-client.on('message', (message) => {
+client.on('messageCreate', (message) => {
     // Check that a human sent the message and that there is some content
     if (!message.author.bot && message.content.length > 0) {
         if (message.content.startsWith(prefix)) {

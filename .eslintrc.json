@@ -67,7 +67,8 @@
                 "allowAsStatement": true
             }
         ],
-        "object-curly-spacing": [
+        "object-curly-spacing": "off",
+        "@typescript-eslint/object-curly-spacing": [
             "error",
             "always"
         ],
