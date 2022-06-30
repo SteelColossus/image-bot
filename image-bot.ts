@@ -12,7 +12,7 @@ config();
 
 const loggerFormat = format.combine(
     format.timestamp(),
-    format.printf((info) => `${info.timestamp as string} ${info.level}: ${info.message}`)
+    format.printf((info) => `${info.timestamp as string} ${info.level}: ${info.message as string}`)
 );
 
 // Sets up the logger
@@ -94,7 +94,7 @@ function getSafeSetting(channel: TextBasedChannel): 'off' | 'high' {
 }
 
 // eslint-disable-next-line max-params,max-len
-async function postRandomImage<T>(query: string, sendMessage: (message: string | MessageOptions) => Promise<T>, channel: TextBasedChannel | null, gifsOnly = false): Promise<T> {
+async function postRandomImage<T>(query: string, sendMessage: (message: string | Pick<MessageOptions, 'files'>) => Promise<T>, channel: TextBasedChannel | null, gifsOnly = false): Promise<T> {
     // Get the current request time
     const newTime = new Date().getTime() - lastRequestTime.getTime();
 
