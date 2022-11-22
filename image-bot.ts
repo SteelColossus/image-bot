@@ -1,6 +1,6 @@
 // The discord.js API
-import type { CommandInteraction, Message, MessageOptions, TextBasedChannel } from 'discord.js';
-import { Client, Intents } from 'discord.js';
+import type { CommandInteraction, Message, BaseMessageOptions, TextBasedChannel } from 'discord.js';
+import { Client, Events, GatewayIntentBits, Partials } from 'discord.js';
 // The google-images API
 import GoogleImages from 'google-images';
 // The winston API
@@ -39,12 +39,12 @@ if ((process.env.CSE_ID == null || !process.env.CSE_ID)
 // The discord client used to interact with Discord
 const client = new Client({
     intents: [
-        Intents.FLAGS.GUILD_MESSAGES,
-        Intents.FLAGS.DIRECT_MESSAGES
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.DirectMessages
     ],
     partials: [
-        'CHANNEL',
-        'MESSAGE'
+        Partials.Channel,
+        Partials.Message
     ]
 });
 
@@ -79,10 +79,10 @@ function getChannelName(channel: TextBasedChannel): string {
         return channel.name;
     }
 
-    return `${channel.recipient.username} DM`;
+    return `${channel.recipient?.username ?? 'Unknown'} DM`;
 }
 
-function getSafeSetting(channel: TextBasedChannel): 'off' | 'high' {
+function getSafeSetting(channel: TextBasedChannel): 'high' | 'off' {
     let nsfw = true;
 
     if ('nsfw' in channel) {
@@ -94,7 +94,7 @@ function getSafeSetting(channel: TextBasedChannel): 'off' | 'high' {
 }
 
 // eslint-disable-next-line max-params,max-len
-async function postRandomImage<T>(query: string, sendMessage: (message: string | Pick<MessageOptions, 'files'>) => Promise<T>, channel: TextBasedChannel | null, gifsOnly = false): Promise<T> {
+async function postRandomImage<T>(query: string, sendMessage: (message: BaseMessageOptions | string) => Promise<T>, channel: TextBasedChannel | null, gifsOnly = false): Promise<T> {
     // Get the current request time
     const newTime = new Date().getTime() - lastRequestTime.getTime();
 
@@ -159,11 +159,11 @@ async function postRandomImageWithInteraction(query: string, interaction: Comman
     await postRandomImage(query, async(message) => interaction.reply(message), interaction.channel, gifsOnly);
 }
 
-client.once('ready', () => {
+client.once(Events.ClientReady, () => {
     logger.info('I am ready!');
 });
 
-client.on('messageCreate', async(message) => {
+client.on(Events.MessageCreate, async(message) => {
     // Check that a human sent the message and that there is some content
     if (!message.author.bot && message.content.length > 0) {
         if (autoChannels.get(message.channel.id) ?? false) {
@@ -174,12 +174,10 @@ client.on('messageCreate', async(message) => {
     }
 });
 
-client.on('interactionCreate', async(interaction) => {
-    if (!interaction.isCommand()) {
+client.on(Events.InteractionCreate, async(interaction) => {
+    if (!interaction.isChatInputCommand()) {
         return;
     }
-
-    logger.info(interaction.inCachedGuild());
 
     switch (interaction.commandName) {
         case 'enableautoimages': {
@@ -265,7 +263,7 @@ client.on('interactionCreate', async(interaction) => {
     }
 });
 
-client.on('error', (err: Error) => {
+client.on(Events.Error, (err: Error) => {
     logger.error(`There was a connection error: ${err.message}`);
 });
 

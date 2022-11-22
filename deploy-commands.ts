@@ -1,7 +1,5 @@
 /* eslint-disable no-console */
-import { SlashCommandBuilder } from '@discordjs/builders';
-import { REST } from '@discordjs/rest';
-import { Routes } from 'discord-api-types/v9';
+import { REST, Routes, SlashCommandBuilder } from 'discord.js';
 import { clientId, guildId } from './config.json';
 
 // Loads all tokens needed for APIs
@@ -31,10 +29,13 @@ if (process.env.TOKEN == null || !process.env.TOKEN) {
     process.exit(1);
 }
 
-const rest = new REST({ version: '9' }).setToken(process.env.TOKEN);
+const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
 
-rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: commands })
-    .then(() => {
+void (async(): Promise<void> => {
+    try {
+        await rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: commands });
         console.log('Successfully registered application commands.');
-    })
-    .catch(console.error);
+    } catch (error) {
+        console.error(error);
+    }
+})();
