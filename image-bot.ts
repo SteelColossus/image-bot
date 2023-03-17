@@ -1,6 +1,5 @@
 // The discord.js API
-import type { CommandInteraction, Message, BaseMessageOptions, TextBasedChannel } from 'discord.js';
-import { Client, Events, GatewayIntentBits, Partials } from 'discord.js';
+import { type CommandInteraction, type Message, type BaseMessageOptions, type TextBasedChannel, Client, Events, GatewayIntentBits, Partials } from 'discord.js';
 // The google-images API
 import GoogleImages from 'google-images';
 // The winston API
