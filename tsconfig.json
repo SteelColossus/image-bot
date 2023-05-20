@@ -1,12 +1,7 @@
 {
+  "extends": "@tsconfig/node-lts/tsconfig.json",
   "compilerOptions": {
     "outDir": "./built",
-    "strict": true,
-    "sourceMap": true,
-    "target": "es6",
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "esModuleInterop": true,
     "resolveJsonModule": true
   },
   "files": [
