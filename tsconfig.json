@@ -2,10 +2,7 @@
   "extends": "@tsconfig/node-lts/tsconfig.json",
   "compilerOptions": {
     "outDir": "./built",
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
   },
-  "files": [
-    "image-bot.ts",
-    "deploy-commands.ts"
-  ]
+  "files": ["image-bot.ts", "deploy-commands.ts"],
 }

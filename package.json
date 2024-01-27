@@ -16,22 +16,26 @@
     "test": "echo Error: this module has no tests && exit 1",
     "lint": "eslint **/*.ts",
     "lint:fix": "eslint **/*.ts --fix",
+    "format": "prettier **/*.ts --check",
+    "format:fix": "prettier **/*.ts --write",
     "deploy-commands": "ts-node deploy-commands.ts"
   },
   "dependencies": {
-    "discord.js": "^14.11.0",
-    "dotenv": "^16.0.3",
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.4.1",
     "google-images": "^2.1.0",
-    "winston": "^3.8.2"
+    "winston": "^3.11.0"
   },
   "devDependencies": {
-    "@tsconfig/node-lts": "^18.12.2",
-    "@types/google-images": "^2.1.1",
-    "@types/node": "^20.2.1",
-    "@typescript-eslint/eslint-plugin": "^5.59.6",
-    "@typescript-eslint/parser": "^5.59.6",
-    "eslint": "^8.41.0",
-    "ts-node": "^10.9.1",
-    "typescript": "^5.0.4"
+    "@tsconfig/node-lts": "^20.1.1",
+    "@types/google-images": "^2.1.4",
+    "@types/node": "^20.11.8",
+    "@typescript-eslint/eslint-plugin": "^6.19.1",
+    "@typescript-eslint/parser": "^6.19.1",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.2.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
   }
 }
