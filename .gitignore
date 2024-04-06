@@ -81,3 +81,4 @@ typings/
 .vscode
 image-bot.log
 built/
+bun.lockb
