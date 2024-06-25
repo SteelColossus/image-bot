@@ -21,7 +21,7 @@
     "deploy-commands": "ts-node deploy-commands.ts"
   },
   "dependencies": {
-    "discord.js": "^14.14.1",
+    "discord.js": "^14.15.3",
     "dotenv": "^16.4.5",
     "google-images": "^2.1.0",
     "winston": "^3.13.0"
