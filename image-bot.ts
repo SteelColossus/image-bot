@@ -4,6 +4,7 @@ import {
     type Message,
     type BaseMessageOptions,
     type TextBasedChannel,
+    type SendableChannels,
     Client,
     Events,
     GatewayIntentBits,
@@ -82,7 +83,7 @@ function random(min: number, max: number): number {
 
 function getChannelName(channel: TextBasedChannel): string {
     if ('name' in channel) {
-        return channel.name;
+        return channel.name ?? 'Unknown';
     }
 
     return `${channel.recipient?.username ?? 'Unknown'} DM`;
@@ -168,7 +169,7 @@ async function postRandomImage<T>(
     }
 }
 
-async function postRandomImageWithChannel(query: string, channel: TextBasedChannel): Promise<Message> {
+async function postRandomImageWithChannel(query: string, channel: SendableChannels): Promise<Message> {
     return postRandomImage(query, async (message) => channel.send(message), channel);
 }
 
