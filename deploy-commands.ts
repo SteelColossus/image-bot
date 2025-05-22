@@ -1,5 +1,7 @@
 import { REST, Routes, SlashCommandBuilder } from 'discord.js';
-import { clientId, guildId } from './config.json';
+import configJson from './config.json';
+const clientId = configJson.clientId;
+const guildId = configJson.guildId;
 
 // Loads all tokens needed for APIs
 import { config } from 'dotenv';
