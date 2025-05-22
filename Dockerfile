@@ -10,7 +10,7 @@ RUN npm install && npm run build:prod
 # Start from a node image
 FROM node:lts-alpine
 # Set the node environment variable to production
-ENV NODE_ENV production
+ENV NODE_ENV=production
 # Set the working directory
 WORKDIR /home/node/image-bot
 # Copy the package.json files into the working directory
