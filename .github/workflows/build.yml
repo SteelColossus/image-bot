@@ -7,7 +7,7 @@ on:
 env:
   CI: true
 jobs:
-  test:
+  build:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
