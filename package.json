@@ -25,18 +25,18 @@
     "discord.js": "^14.24.2",
     "dotenv": "^17.2.3",
     "google-images": "^2.1.0",
-    "winston": "^3.17.0"
+    "winston": "^3.18.3"
   },
   "devDependencies": {
-    "@eslint/js": "^9.27.0",
+    "@eslint/js": "^9.39.1",
     "@tsconfig/node-lts": "^22.0.1",
     "@types/google-images": "^2.1.4",
-    "@types/node": "^24.9.2",
-    "eslint": "^9.27.0",
-    "eslint-config-prettier": "^10.1.5",
-    "prettier": "^3.5.3",
+    "@types/node": "^24.10.0",
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.6.2",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.3",
-    "typescript-eslint": "^8.32.1"
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.3"
   }
 }
