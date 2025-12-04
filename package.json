@@ -29,14 +29,14 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
-    "@tsconfig/node-lts": "^22.0.1",
+    "@tsconfig/node-lts": "22.0.1",
     "@types/google-images": "^2.1.4",
     "@types/node": "^24.10.1",
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",
-    "prettier": "^3.7.3",
+    "prettier": "^3.7.4",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.48.0"
+    "typescript-eslint": "^8.48.1"
   }
 }
