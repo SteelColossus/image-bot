@@ -212,7 +212,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
             const { channelId } = interaction;
             const alreadyEnabled = autoChannels.get(channelId) ?? false;
-            let messageText = '';
+            let messageText;
 
             if (!alreadyEnabled) {
                 autoChannels.set(channelId, true);
@@ -237,7 +237,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
             const { channelId } = interaction;
             const alreadyDisabled = !(autoChannels.get(channelId) ?? false);
-            let messageText = '';
+            let messageText;
 
             if (!alreadyDisabled) {
                 autoChannels.set(channelId, false);

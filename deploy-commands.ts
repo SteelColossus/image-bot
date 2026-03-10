@@ -1,5 +1,5 @@
 import { REST, Routes, SlashCommandBuilder } from 'discord.js';
-import configJson from './config.json';
+import configJson from './config.json' with { type: 'json' };
 const clientId = configJson.clientId;
 const guildId = configJson.guildId;
 
