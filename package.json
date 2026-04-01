@@ -22,7 +22,7 @@
     "deploy-commands": "ts-node deploy-commands.ts"
   },
   "dependencies": {
-    "discord.js": "^14.25.1",
+    "discord.js": "^14.26.0",
     "dotenv": "^17.3.1",
     "google-images": "^2.1.0",
     "winston": "^3.19.0"
@@ -31,12 +31,12 @@
     "@eslint/js": "^10.0.1",
     "@tsconfig/node-lts": "^24.0.0",
     "@types/google-images": "^2.1.4",
-    "@types/node": "^25.4.0",
+    "@types/node": "^25.5.0",
     "eslint": "^10.0.3",
     "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.8.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.57.0"
+    "typescript-eslint": "^8.58.0"
   }
 }
