@@ -6,6 +6,9 @@ on:
     branches: [main, master]
 permissions:
   contents: read
+concurrency:
+  group: build
+  cancel-in-progress: true
 env:
   CI: true
 jobs:
