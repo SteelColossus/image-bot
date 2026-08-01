@@ -32,11 +32,12 @@
     "@tsconfig/node-lts": "^24.0.0",
     "@types/google-images": "^2.1.4",
     "@types/node": "^26.1.2",
+    "@typescript/native": "npm:typescript@^7.0.2",
     "eslint": "^10.8.0",
     "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.9.6",
     "ts-node": "^10.9.2",
-    "typescript": "^6.0.3",
+    "typescript": "npm:@typescript/typescript6@^6.0.2",
     "typescript-eslint": "^8.65.0"
   }
 }
